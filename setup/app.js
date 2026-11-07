@@ -75,7 +75,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 
 /* ---------- lists ---------- */
 const savedOn=id=>S.saved[id]&&!S.saved[id].del;
-const allItems=()=>D.items.concat(D.firsthand||[],(D.deep&&D.deep.items)||[]);
+const allItems=()=>D.items.concat(D.firsthand||[],(D.deep&&D.deep.items)||[],D.monthly||[]);
 const byId=id=>allItems().find(i=>i.id===id)||(S.saved[id]&&S.saved[id].item);
 const sortNew=a=>a.slice().sort((x,y)=>tsOf(y)-tsOf(x));
 const homeItems=()=>D.items.filter(i=>ageH(i)<HOME_H);
@@ -109,7 +109,8 @@ function secsHTML(items,empty){ const h=D.sections.map(s=>{const l=sortNew(items
   return `<section class="sec" id="sec-${s.id}"><div class="sec-h"><h2>${esc(s.name)}</h2><span class="sub">${esc(s.sub||'')}</span><span class="c">${l.length} 則</span></div><div class="list">${l.map(rowHTML).join('')}</div></section>`}).join('');
   return h||`<div class="empty">${empty}</div>`; }
 function skipHTML(){ const sk=D.skipped||[]; if(!sk.length) return ''; return `<section class="sec skip" id="sec-skip"><div class="sec-h"><h2>跳過也沒差</h2><span class="sub">被擋下、最接近門檻的</span><span class="c">${sk.length} 則</span></div><div class="list">${sk.map((s,k)=>`<div class="row"><button class="rt" type="button" data-skip="${k}"><span class="tw"><span class="t">${esc(s.x)}</span></span></button>${S.open['skip'+k]?`<div class="why2">${esc(s.why)}${s.src?'・'+esc(s.src):''}</div>`:''}</div>`).join('')}</div></section>`; }
-function homeHTML(){ return `<section class="intro"><div class="date">${esc(D.edition.stamp||'')}</div><h1>${esc(D.edition.label)}</h1></section>
+function monthlyBox(){ const m=sortNew(D.monthly||[])[0]; if(!m||(Date.now()-tsOf(m))>32*864e5) return ''; return `<section class="box monthly"><div class="k">月報・${esc(m.month||'')}</div><div class="list">${rowHTML(m)}</div></section>`; }
+function homeHTML(){ return `<section class="intro"><div class="date">${esc(D.edition.stamp||'')}</div><h1>${esc(D.edition.label)}</h1></section>${monthlyBox()}
   ${(D.bluf||[]).length?`<section class="box bluf"><div class="k">三句話看完本期</div><ol>${D.bluf.map(b=>`<li>${esc(b)}</li>`).join('')}</ol></section>`:''}
   ${secsHTML(homeItems(),'<b>24 小時內沒有新文章</b>更早的在 yesterday。')}${skipHTML()}
   ${D.sources_note?`<p class="foot">${esc(D.sources_note)}</p>`:''}`; }
@@ -124,8 +125,9 @@ function deepHTML(){ const dp=D.deep||{}; const ch=dp.chapters||DEEP_DEFAULT.map
   <section class="deep-hero"><div class="k">ARK INVEST・BIG IDEAS 2026・111 頁</div><h2>ARK 年度報告：13 個大趨勢</h2><p>ARK 自己有部位、立場偏多。每章都對照你的持倉，並附上反方說法。</p><div class="prog">${ch.map(c=>`<i class="${c.id&&byId(c.id)?'on':''}"></i>`).join('')}</div></section>
   <div class="list" style="margin-top:8px">${ch.map(c=>{const it=c.id&&byId(c.id); if(it) return rowHTML(it).replace('<span class="tw">',`<span class="no">${String(c.no).padStart(2,'0')}</span><span class="tw">`);
     return `<div class="row ch later"><div class="rt"><span class="no">${String(c.no).padStart(2,'0')}</span><span class="tw"><span class="t">${esc(c.zh)}</span><span class="tk"><i>${esc(c.en)}</i></span></span>${c.next?'<span class="pill">下一章</span>':''}</div></div>`;}).join('')}</div>
+  ${(D.monthly||[]).length?`<section class="sec"><div class="sec-h"><h2>月報</h2><span class="sub">每月 1 號，把上個月的內容重新讀過、收斂成一份</span></div><div class="list">${sortNew(D.monthly).map(rowHTML).join('')}</div></section>`:''}
   <section class="sec"><div class="sec-h"><h2>一手分析</h2><span class="sub">財報、Fed、13F 這類原始文件的解讀</span></div><div class="list">${sortNew(D.firsthand||[]).map(rowHTML).join('')||'<p class="empty">還沒有</p>'}</div></section>
-  <p class="foot">一手分析不會被 15 天清掉。</p>`; }
+  <p class="foot">月報、一手分析、ARK 章節都永久保留。所有文章另外加密存檔，日後提問時可以回頭查。</p>`; }
 function chips(items){ const c=$('#chips'); if(S.view!=='home'&&S.view!=='older'){c.hidden=true;return} c.hidden=false; const have=new Set(items.map(i=>i.sec));
   c.innerHTML=D.sections.filter(s=>have.has(s.id)).map(s=>`<a href="#sec-${s.id}" data-sec="${s.id}">${esc(s.name)}</a>`).join('')+(S.view==='home'&&(D.skipped||[]).length?`<a href="#sec-skip" data-sec="skip">跳過也沒差</a>`:''); }
 function render(){ if(!D) return; const m=$('#main'); let items=[];
@@ -168,7 +170,7 @@ document.addEventListener('click',e=>{
     const f=S.fb[id]=Object.assign({},S.fb[id],{note:t,noteSent:true}); persist(); const it=byId(id);
     send({type:'note',itemId:id,title:it?it.title:'',stars:f.stars||'',text:t}); cd.querySelector('.sent').textContent='已送出，下一期處理'; toast('收到'); return;}
   const jp=e.target.closest('[data-jump]'); if(jp){e.preventDefault(); const id=jp.dataset.jump; const it=byId(id); if(!it){toast('這則已經不在了');return}
-    const inHome=homeItems().some(i=>i.id===id), inOld=olderItems().some(i=>i.id===id), inFirst=(D.firsthand||[]).some(i=>i.id===id);
+    const inHome=homeItems().some(i=>i.id===id), inOld=olderItems().some(i=>i.id===id), inFirst=(D.firsthand||[]).concat(D.monthly||[],(D.deep&&D.deep.items)||[]).some(i=>i.id===id);
     S.view=inHome?'home':inOld?'older':inFirst?'deep':savedOn(id)?'saved':'home'; S.open={}; S.open[id]=1; render(); const r=document.querySelector('[data-row="'+CSS.escape(id)+'"]'); r&&r.scrollIntoView({block:'start'}); return;}
   const tb=e.target.closest('.tab'); if(tb){S.view=tb.dataset.view;S.open={};render();scrollTo(0,0);return;}
 });
