@@ -445,12 +445,10 @@ document.addEventListener('click',e=>{
 $('#openSet').onclick=()=>{ $('#sheet').innerHTML=`<h2>設定</h2>
   <div class="opt"><span>外觀</span><span><button class="btn" data-theme-set="auto">自動</button> <button class="btn" data-theme-set="light">淺色</button> <button class="btn" data-theme-set="dark">深色</button></span></div>
   <div class="opt"><span>同步</span><span id="syncTxt" style="color:var(--gold-ink);font-weight:700">${esc(syncStatus)}</span></div>
-  <div class="opt"><span>解鎖畫面</span><button class="btn" id="showLock">預覽</button></div>
   <p style="font-size:.8125rem;color:var(--ink-3)">放到主畫面：Safari →「分享」→「加入主畫面」。</p>
   <button class="btn primary" id="closeSet">關閉</button>`; $('#scrim').hidden=false;
   document.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{S.prefs.theme=b.dataset.themeSet;S.prefs.t=Date.now();persist();applyTheme();queuePush();});
-  $('#closeSet').onclick=()=>$('#scrim').hidden=true;
-  $('#showLock').onclick=()=>{$('#scrim').hidden=true; showLock(true);}; };
+  $('#closeSet').onclick=()=>$('#scrim').hidden=true; };
 $('#scrim').onclick=e=>{if(e.target.id==='scrim')$('#scrim').hidden=true};
 
 /* lock */
