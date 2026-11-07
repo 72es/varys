@@ -89,10 +89,12 @@ main{max-width:var(--col);margin:0 auto}
 .row:first-child{border-top:0}
 .rt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:flex-start;gap:10px;width:100%;padding:13px 2px;-webkit-tap-highlight-color:transparent}
 .rt .tw{flex:1;min-width:0}
-.rt .t{display:block;font-size:1.0625rem;font-weight:700;line-height:1.6}
+.rt .t{display:block;font-size:1.0625rem;font-weight:400;line-height:1.6}
+.rt .t b{font-weight:700}
 .rt .tk{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px}
 .tk i{font-style:normal;font-size:.6875rem;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:0 5px;line-height:1.55}
-.row.read .rt .t{color:var(--ink-read);font-weight:500}
+.row.read .rt .t{color:var(--ink-read)}
+.row.read .rt .t b{font-weight:500}
 .row.read .tk i{color:var(--ink-read);border-color:var(--rule)}
 .rt .mins{flex:none;font-size:.75rem;color:var(--ink-3);padding-top:.3em;white-space:nowrap}
 .row.read .rt .mins{visibility:hidden}
@@ -158,8 +160,8 @@ textarea{width:100%;min-height:46px;resize:vertical;border:1px solid var(--rule)
 .ev .d{font-size:.8125rem;color:var(--ink-3);font-weight:700;line-height:1.5}
 .ev b{display:block}
 .ev p{margin:2px 0 0;color:var(--ink-2);font-size:.875rem}
-.ev.done{opacity:.55}
-.ev .st{font-size:.6875rem;font-weight:700;color:var(--ok);border:1px solid var(--ok);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px}
+
+.ev .st{font-size:.6875rem;font-weight:700;color:var(--gold-ink);border:1px solid var(--gold);border-radius:4px;padding:0 5px;margin-right:6px;vertical-align:2px}
 
 /* deep read */
 .deep-hero{margin-top:14px;padding:18px;border-radius:16px;background:radial-gradient(120% 120% at 50% 20%,#2a3a63,#1b2747 60%,#121a30);color:var(--gold-light)}

@@ -83,10 +83,12 @@ const olderItems=()=>D.items.filter(i=>{const h=ageH(i);return h>=HOME_H&&h<KEEP
 const savedItems=()=>Object.keys(S.saved).filter(savedOn).map(id=>allItems().find(i=>i.id===id)||S.saved[id].item).filter(Boolean);
 const unread=()=>homeItems().filter(i=>!S.read[i.id]).length;
 
+/* bold only the lead phrase up to the first ：；｜, the rest in regular weight */
+function titleHTML(s){ s=String(s||''); const m=s.match(/^(.{1,40}?[：；｜])([\s\S]+)$/); return m?`<b>${esc(m[1])}</b>${esc(m[2])}`:`<b>${esc(s)}</b>`; }
 function rowHTML(it){ const rd=!!S.read[it.id],op=!!S.open[it.id],sv=savedOn(it.id);
   const tk=(it.tickers||[]).length?`<span class="tk">${it.tickers.map(t=>`<i>${esc(t)}</i>`).join('')}</span>`:'';
   const isNew=ageH(it)<12;
-  return `<div class="row ${rd?'read':''}" data-row="${esc(it.id)}"><button class="rt" type="button" data-toggle="${esc(it.id)}" aria-expanded="${op}">${isNew?'<span class="new" title="12 小時內"></span>':''}<span class="tw"><span class="t">${esc(it.title)}</span>${tk}</span>${sv?'<svg class="mk" aria-label="已收藏"><use href="#mark"/></svg>':''}</button>${op?cardHTML(it):''}</div>`; }
+  return `<div class="row ${rd?'read':''}" data-row="${esc(it.id)}"><button class="rt" type="button" data-toggle="${esc(it.id)}" aria-expanded="${op}">${isNew?'<span class="new" title="12 小時內"></span>':''}<span class="tw"><span class="t">${titleHTML(it.title)}</span>${tk}</span>${sv?'<svg class="mk" aria-label="已收藏"><use href="#mark"/></svg>':''}</button>${op?cardHTML(it):''}</div>`; }
 function para(t){ if(Array.isArray(t)) return t.map(para).join(''); if(t&&typeof t==='object'){ if(t.list) return `<ul class="bl">${t.list.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; if(t.table){const tb=t.table;return `<div class="tbl">${tb.cap?`<p class="tb-cap">${esc(tb.cap)}</p>`:''}${(tb.rows||[]).map(r=>`<div class="tb2"><b>${esc(r[0])}</b><span>${esc(r.slice(1).join('　'))}</span></div>`).join('')}</div>`;} return ''; }
   return String(t||'').split(/\n\s*\n/).filter(s=>s.trim()).map(p=>`<p>${esc(p)}</p>`).join(''); }
 function cardHTML(it){ const f=S.fb[it.id]||{}, sv=savedOn(it.id);
@@ -119,7 +121,7 @@ function radarHTML(){ const ev=((D.primary&&D.primary.events)||[]).slice().sort(
   <div class="legend"><span><i class="dot s-alert"></i>要注意</span><span><i class="dot s-warn"></i>留意</span><span><i class="dot s-act"></i>可行動</span><span><i class="dot s-quiet"></i>沒事</span></div>
   <div class="radar">${(D.radar||[]).map(r=>`<div class="rd"><div class="rd-h"><i class="dot s-${esc(r.s)}"></i>${esc(r.t)}</div><ul>${(r.lines||[]).map(l=>`<li>${esc(l.x)}${l.ref?`<a href="#" data-jump="${esc(l.ref)}">出處</a>`:''}</li>`).join('')}</ul></div>`).join('')}</div>
   <h1 class="view-h" style="padding-top:32px">一手行事曆</h1>${D.primary&&D.primary.intro?`<p class="view-sub">${esc(D.primary.intro)}</p>`:''}
-  <div class="cal">${ev.map(e=>`<div class="ev ${e.status==='done'?'done':''}"><div class="d">${esc(e.tw)}</div><div><b>${esc(e.t)}${e.status==='done'?'<span class="st">已發生</span>':''}</b><p>${esc(e.why)}${e.ref&&byId(e.ref)?` <a href="#" data-jump="${esc(e.ref)}">讀分析</a>`:''}</p></div></div>`).join('')}</div>`; }
+  <div class="cal">${ev.map(e=>`<div class="ev ${e.status==='done'?'done':''}"><div class="d">${esc(e.tw)}</div><div><b>${e.status==='done'?'<span class="st">已發生</span>':''}${esc(e.t)}</b><p>${esc(e.why)}${e.ref&&byId(e.ref)?` <a href="#" data-jump="${esc(e.ref)}">讀分析</a>`:''}</p></div></div>`).join('')}</div>`; }
 function deepHTML(){ const dp=D.deep||{}; const ch=dp.chapters||DEEP_DEFAULT.map((c,k)=>({no:k+1,en:c[0],zh:c[1]})); const done=ch.filter(c=>c.id&&byId(c.id)).length;
   return `<h1 class="view-h">深讀</h1><p class="view-sub">長篇報告拆成一章一篇，可以評分、留言追問。</p>
   <section class="deep-hero"><div class="k">ARK INVEST・BIG IDEAS 2026・111 頁</div><h2>ARK 年度報告：13 個大趨勢</h2><p>ARK 自己有部位、立場偏多。每章都對照你的持倉，並附上反方說法。</p><div class="prog">${ch.map(c=>`<i class="${c.id&&byId(c.id)?'on':''}"></i>`).join('')}</div></section>
