@@ -1,2 +1,4 @@
 data.json
 *.plain.json
+__pycache__/
+*.pyc
